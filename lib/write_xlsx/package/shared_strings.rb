@@ -8,11 +8,13 @@ module Writexlsx
 
       include Writexlsx::Utility
 
+      PRESERVE_SPACE_ATTRIBUTES = ['xml:space', 'preserve'].freeze
+
       def initialize
         @writer        = Package::XMLWriterSimple.new
         @strings       = [] # string table
         @strings_index = {} # string table index
-        @count         = {} # count
+        @count         = 0 # count
       end
 
       def index(string, params = {})
@@ -21,18 +23,16 @@ module Writexlsx
       end
 
       def add(string)
-        str = string.dup
-        if @count[str]
-          @count[str] += 1
-        else
+        unless @strings_index[string]
+          str = string.dup.freeze
           @strings << str
           @strings_index[str] = @strings.size - 1
-          @count[str] = 1
         end
+        @count += 1
       end
 
       def string(index)
-        @strings[index].dup
+        @strings[index]
       end
 
       def empty?
@@ -79,7 +79,6 @@ module Writexlsx
       # Write the <si> element.
       #
       def write_si(string)
-        string = string.dup
         attributes = []
 
         # Excel escapes control characters with _xHHHH_ and also escapes any
@@ -102,7 +101,7 @@ module Writexlsx
         end
 
         # Add attribute to preserve leading or trailing whitespace.
-        attributes << ['xml:space', 'preserve'] if string =~ /\A\s|\s\Z/
+        attributes << PRESERVE_SPACE_ATTRIBUTES if string =~ /\A\s|\s\Z/
 
         # Write any rich strings without further tags.
         if string =~ %r{^<r>} && string =~ %r{</r>$}
@@ -122,7 +121,7 @@ module Writexlsx
       end
 
       def total_count
-        @count.values.inject(0) { |sum, count| sum += count }
+        @count #.values.inject(0) { |sum, count| sum += count }
       end
 
       def unique_count
