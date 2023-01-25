@@ -19,6 +19,6 @@ class TestWriteALatin < Minitest::Test
         ['charset', 0]
       ]
     )
-    assert_equal(expected, result)
+    assert_equal(expected, result.join)
   end
 end

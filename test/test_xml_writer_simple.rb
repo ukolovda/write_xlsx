@@ -10,13 +10,13 @@ class TestXMLWriterSimple < Minitest::Test
 
   def test_xml_decl
     assert_equal(
-      %(<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n),
+      [%(<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n)],
       @obj.xml_decl
     )
   end
 
   def test_empty_tag
-    assert_equal('<foo/>', @obj.empty_tag('foo'))
+    assert_equal('<foo/>', @obj.empty_tag('foo').join)
   end
 
   def test_empty_tag_with_xml_decl
@@ -24,23 +24,23 @@ class TestXMLWriterSimple < Minitest::Test
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <foo/>
 EOS
-    assert_equal(expected, @obj.xml_decl + @obj.empty_tag('foo') + "\n")
+    assert_equal(expected, (@obj.xml_decl + @obj.empty_tag('foo') + ["\n"]).join)
   end
 
   def test_start_end_tag
-    assert_equal("<foo></foo>", @obj.start_tag('foo') + @obj.end_tag('foo'))
+    assert_equal("<foo></foo>", (@obj.start_tag('foo') + @obj.end_tag('foo')).join)
   end
 
   def test_attribute
     assert_equal(
-      "<foo x=\"1&gt;2\"/>", @obj.empty_tag("foo", [['x', '1>2']])
+      "<foo x=\"1&gt;2\"/>", @obj.empty_tag("foo", [['x', '1>2']]).join
     )
   end
 
   def test_character_data
     assert_equal(
       "<foo>&lt;tag&gt;&amp;amp;&lt;/tag&gt;</foo>",
-      @obj.start_tag('foo') + @obj.characters("<tag>&amp;</tag>") + @obj.end_tag('foo')
+      (@obj.start_tag('foo') + @obj.characters("<tag>&amp;</tag>") + @obj.end_tag('foo')).join
     )
   end
 

@@ -1,14 +1,21 @@
 # -*- coding: utf-8 -*-
+# frozen_string_literal: true
 
 require 'helper'
+require 'memory_profiler'
 
 class TestRegressionTable23 < Minitest::Test
   def setup
     setup_dir_var
+    MemoryProfiler.start
   end
 
   def teardown
     @tempfile.close(true) if @tempfile
+    @tempfile = nil
+    @xlsx = nil
+    report = MemoryProfiler.stop
+    report.pretty_print
   end
 
   def test_table23

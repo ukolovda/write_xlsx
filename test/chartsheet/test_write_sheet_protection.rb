@@ -14,7 +14,7 @@ class TestChartsheetWriteSheetProtection < Minitest::Test
 
     @chartsheet.protect('', {})
     result = @chartsheet.__send__(:write_sheet_protection)
-    assert_equal(expected_to_array(expected), got_to_array(result))
+    assert_equal(expected_to_array(expected), got_to_array(result.join))
   end
 
   def test_chartsheet_write_sheet_protection_with_password
@@ -22,7 +22,7 @@ class TestChartsheetWriteSheetProtection < Minitest::Test
 
     @chartsheet.protect('password', {})
     result = @chartsheet.__send__(:write_sheet_protection)
-    assert_equal(expected_to_array(expected), got_to_array(result))
+    assert_equal(expected_to_array(expected), got_to_array(result.join))
   end
 
   def test_chartsheet_write_sheet_protection_without_password_and_content
@@ -30,7 +30,7 @@ class TestChartsheetWriteSheetProtection < Minitest::Test
 
     @chartsheet.protect('', { :objects => 0 })
     result = @chartsheet.__send__(:write_sheet_protection)
-    assert_equal(expected_to_array(expected), got_to_array(result))
+    assert_equal(expected_to_array(expected), got_to_array(result.join))
   end
 
   def test_chartsheet_write_sheet_protection_with_opjects0_option
@@ -38,7 +38,7 @@ class TestChartsheetWriteSheetProtection < Minitest::Test
 
     @chartsheet.protect('password', { :objects => 0 })
     result = @chartsheet.__send__(:write_sheet_protection)
-    assert_equal(expected_to_array(expected), got_to_array(result))
+    assert_equal(expected_to_array(expected), got_to_array(result.join))
   end
 
   def test_chartsheet_write_sheet_protection_without_password
@@ -46,7 +46,7 @@ class TestChartsheetWriteSheetProtection < Minitest::Test
 
     @chartsheet.protect('', { :content => 0 })
     result = @chartsheet.__send__(:write_sheet_protection)
-    assert_equal(expected_to_array(expected), got_to_array(result))
+    assert_equal(expected_to_array(expected), got_to_array(result.join))
   end
 
   def test_chartsheet_write_sheet_protection_without_password_and_content_option
@@ -62,7 +62,7 @@ class TestChartsheetWriteSheetProtection < Minitest::Test
 
     @chartsheet.protect('password', { :content => 0, :objects => 0 })
     result = @chartsheet.__send__(:write_sheet_protection)
-    assert_equal(expected_to_array(expected), got_to_array(result))
+    assert_equal(expected_to_array(expected), got_to_array(result.join))
   end
 
   def test_chartsheet_write_sheet_protection_with_password_full_options
@@ -87,6 +87,6 @@ class TestChartsheetWriteSheetProtection < Minitest::Test
     }
     @chartsheet.protect('password', options)
     result = @chartsheet.__send__(:write_sheet_protection)
-    assert_equal(expected_to_array(expected), got_to_array(result))
+    assert_equal(expected_to_array(expected), got_to_array(result.join))
   end
 end

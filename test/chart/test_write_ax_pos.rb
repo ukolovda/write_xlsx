@@ -11,6 +11,6 @@ class TestAxPos < Minitest::Test
   def test_write_axis_pos
     expected = '<c:axPos val="l"/>'
     result = @chart.__send__('write_axis_pos', 'l')
-    assert_equal(expected, result)
+    assert_equal(expected, result.join)
   end
 end

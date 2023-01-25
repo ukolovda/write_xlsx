@@ -11,6 +11,6 @@ class TestWriteLabelOffset < Minitest::Test
   def test_write_label_offset
     expected = '<c:lblOffset val="100"/>'
     result = @chart.__send__('write_label_offset', 100)
-    assert_equal(expected, result)
+    assert_equal(expected, result.join)
   end
 end

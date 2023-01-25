@@ -37,32 +37,32 @@ module Writexlsx
       end
 
       def start_tag(tag, attr = [])
-        io_write(start_tag_str(tag, attr))
+        io_write(*start_tag_str(tag, attr))
       end
 
       def start_tag_str(tag, attr = [])
-        "<#{tag}#{key_vals(attr)}>"
+        ["<", tag] + key_vals(attr) + [">"]
       end
 
       def end_tag(tag)
-        io_write(end_tag_str(tag))
+        io_write(*end_tag_str(tag))
       end
 
       def end_tag_str(tag)
-        "</#{tag}>"
+        ["</", tag, ">"]
       end
 
       def empty_tag(tag, attr = [])
-        str = "<#{tag}#{key_vals(attr)}/>"
-        io_write(str)
+        str = ["<", tag, ] + key_vals(attr) + ["/>"]
+        io_write(*str)
       end
 
       def empty_tag_encoded(tag, attr = [])
-        io_write(empty_tag_encoded_str(tag, attr))
+        io_write(*empty_tag_encoded_str(tag, attr))
       end
 
       def empty_tag_encoded_str(tag, attr = [])
-        "<#{tag}#{key_vals(attr)}/>"
+        ["<", tag] + key_vals(attr) + ["/>"]
       end
 
       def data_element(tag, data, attr = [])
@@ -100,20 +100,24 @@ module Writexlsx
         @io.string
       end
 
-      def io_write(str)
-        @io << str
+      def io_write(*str)
+        str.each do |s|
+          @io << s
+        end
         str
       end
 
       private
 
       def key_val(key, val)
-        %( #{key}="#{val}")
+        # %( #{key}="#{val}")
+        [" ", key, '="', val, '"']
       end
 
       def key_vals(attribute)
-        attribute
-          .inject('') { |str, attr| str + key_val(attr.first, escape_attributes(attr.last)) }
+        # attribute
+        #   .inject('') { |str, attr| str + key_val(attr.first, escape_attributes(attr.last)) }
+        attribute.map { |attr| key_val(attr.first, escape_attributes(attr.last)) }.flatten
       end
 
       def escape_attributes(str = '')

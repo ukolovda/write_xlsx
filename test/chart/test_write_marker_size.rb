@@ -11,6 +11,6 @@ class TestWriteMarkerSize < Minitest::Test
   def test_write_marker_size
     expected = '<c:size val="3"/>'
     result = @chart.__send__('write_marker_size', 3)
-    assert_equal(expected, result)
+    assert_equal(expected, result.join)
   end
 end
