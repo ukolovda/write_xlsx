@@ -9,7 +9,7 @@ module Writexlsx
     class SharedStrings
       include Writexlsx::Utility
 
-      PRESERVE_SPACE_ATTRIBUTES = ['xml:space', 'preserve'].freeze
+      PRESERVE_SPACE_ATTRIBUTES = [' xml:space="preserve"'].freeze
 
       def initialize
         @writer        = Package::XMLWriterSimple.new
@@ -82,8 +82,6 @@ module Writexlsx
       # Write the <si> element.
       #
       def write_si(string)
-        attributes = []
-
         # Excel escapes control characters with _xHHHH_ and also escapes any
         # literal strings of that type by encoding the leading underscore. So
         # "\0" -> _x0000_ and "_x0000_" -> _x005F_x0000_.
@@ -103,13 +101,12 @@ module Writexlsx
         # Convert character to \xC2\xxx or \xC3\xxx
         string = add_c2_c3(string) if string.bytesize == 1 && 0x80 <= string.ord && string.ord <= 0xFF
 
-        # Add attribute to preserve leading or trailing whitespace.
-        attributes << PRESERVE_SPACE_ATTRIBUTES if string =~ /\A\s|\s\Z/
-
         # Write any rich strings without further tags.
-        if string =~ /^<r>/ && string =~ %r{</r>$}
+        if string =~ %r{^<r>[\s\S]*</r>$}
           @writer.si_rich_element(string)
         else
+          # Add attribute to preserve leading or trailing whitespace.
+          attributes = (string =~ /\A\s|\s\Z/) ? PRESERVE_SPACE_ATTRIBUTES : nil
           @writer.si_element(string, attributes)
         end
       end

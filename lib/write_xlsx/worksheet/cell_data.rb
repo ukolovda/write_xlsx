@@ -70,7 +70,8 @@ module Writexlsx
         { :sst_id => token }
       end
 
-      TYPE_STR_ATTRS = %w[t s].freeze
+      TYPE_STR_ATTRS = ' t="s"' # Use preallocation string for tag attributes
+      
       def write_cell
         attributes = cell_attributes
         attributes << TYPE_STR_ATTRS
