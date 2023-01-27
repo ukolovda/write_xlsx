@@ -994,7 +994,7 @@ module Writexlsx
       check_dimensions(row, col)
       store_row_col_max_min_values(row, col)
 
-      store_data_to_table(NumberCellData.new(self, row, col, num, xf))
+      store_data_to_table(NumberCellData.new(row, col, num, xf))
     end
 
     #
@@ -1016,7 +1016,7 @@ module Writexlsx
 
       index = shared_string_index(str.length > STR_MAX ? str[0, STR_MAX] : str)
 
-      store_data_to_table(StringCellData.new(self, row, col, index, xf))
+      store_data_to_table(StringCellData.new(row, col, index, xf))
     end
 
     #
@@ -1044,7 +1044,7 @@ module Writexlsx
 
       index = shared_string_index(xml_str_of_rich_string(fragments))
 
-      store_data_to_table(StringCellData.new(self, row, col, index, xf))
+      store_data_to_table(StringCellData.new(row, col, index, xf))
     end
 
     #
@@ -1067,7 +1067,7 @@ module Writexlsx
       check_dimensions(row, col)
       store_row_col_max_min_values(row, col)
 
-      store_data_to_table(BlankCellData.new(self, row, col, xf))
+      store_data_to_table(BlankCellData.new(row, col, xf))
     end
 
     #
@@ -1088,7 +1088,7 @@ module Writexlsx
         store_row_col_max_min_values(row, col)
         formula = formula.sub(/^=/, '')
 
-        store_data_to_table(FormulaCellData.new(self, row, col, formula, format, value))
+        store_data_to_table(FormulaCellData.new(row, col, formula, format, value))
       end
     end
 
@@ -1123,9 +1123,9 @@ module Writexlsx
 
       store_data_to_table(
         if type == 'a'
-          FormulaArrayCellData.new(self, row1, col1, formula, xf, range, value)
+          FormulaArrayCellData.new(row1, col1, formula, xf, range, value)
         elsif type == 'd'
-          DynamicFormulaArrayCellData.new(self, row1, col1, formula, xf, range, value)
+          DynamicFormulaArrayCellData.new(row1, col1, formula, xf, range, value)
         else
           raise "invalid type in write_array_formula_base()."
         end
@@ -1176,7 +1176,7 @@ module Writexlsx
       check_dimensions(row, col)
       store_row_col_max_min_values(row, col)
 
-      store_data_to_table(BooleanCellData.new(self, row, col, val, xf))
+      store_data_to_table(BooleanCellData.new(row, col, val, xf))
     end
 
     #
@@ -1321,7 +1321,7 @@ module Writexlsx
       date_time = convert_date_time(str)
 
       if date_time
-        store_data_to_table(NumberCellData.new(self, row, col, date_time, xf))
+        store_data_to_table(NumberCellData.new(row, col, date_time, xf))
       else
         # If the date isn't valid then write it as a string.
         write_string(*args)
@@ -3119,7 +3119,7 @@ EOS
 
     def write_cell_column_dimension(row_num)  # :nodoc:
       (@dim_colmin..@dim_colmax).each do |col_num|
-        @cell_data_table[row_num][col_num].write_cell if @cell_data_table[row_num][col_num]
+        @cell_data_table[row_num][col_num].write_cell(self) if @cell_data_table[row_num][col_num]
       end
     end
 
