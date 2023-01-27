@@ -6,8 +6,7 @@ module Writexlsx
     class CellData   # :nodoc:
       include Writexlsx::Utility
 
-      attr_reader :row, :col, :token, :xf
-      attr_reader :result, :range, :link_type, :url, :tip
+      attr_reader :row, :col, :xf
 
       #
       # attributes for the <cell> element. This is the innermost loop so efficiency is
@@ -38,6 +37,8 @@ module Writexlsx
     end
 
     class NumberCellData < CellData # :nodoc:
+      attr_reader :token
+
       def initialize(row, col, num, xf)
         @row = row
         @col = col
@@ -57,6 +58,7 @@ module Writexlsx
     end
 
     class StringCellData < CellData # :nodoc:
+      attr_reader :token
       def initialize(row, col, index, xf)
         @row = row
         @col = col
@@ -83,6 +85,8 @@ module Writexlsx
     end
 
     class FormulaCellData < CellData # :nodoc:
+      attr_reader :token, :result, :range, :link_type, :url
+
       def initialize(row, col, formula, xf, result)
         @row = row
         @col = col
@@ -118,6 +122,7 @@ module Writexlsx
     end
 
     class FormulaArrayCellData < CellData # :nodoc:
+      attr_reader :token, :result, :range, :link_type, :url
       def initialize(row, col, formula, xf, range, result)
         @row = row
         @col = col
@@ -140,6 +145,7 @@ module Writexlsx
     end
 
     class DynamicFormulaArrayCellData < CellData # :nodoc:
+      attr_reader :token, :result, :range, :link_type, :url
       def initialize(row, col, formula, xf, range, result)
         @row = row
         @col = col
@@ -166,6 +172,8 @@ module Writexlsx
     end
 
     class BooleanCellData < CellData # :nodoc:
+      attr_reader :token
+
       def initialize(row, col, val, xf)
         @row = row
         @col = col
