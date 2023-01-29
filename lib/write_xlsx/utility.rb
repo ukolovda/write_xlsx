@@ -13,10 +13,11 @@ module Writexlsx
     #
     # xl_rowcol_to_cell($row, col, row_absolute, col_absolute)
     #
-    def xl_rowcol_to_cell(row, col, row_absolute = false, col_absolute = false)
+    def xl_rowcol_to_cell(row, col, row_absolute = false, col_absolute = false, prefix=nil, suffix=nil, suffix2 = nil, suffix3 = nil)
       row += 1      # Change from 0-indexed to 1 indexed.
       col_str = xl_col_to_name(col, col_absolute)
-      "#{col_str}#{absolute_char(row_absolute)}#{row}"
+      row_str = ColName.instance.row_str(row)
+      "#{prefix}#{col_str}#{absolute_char(row_absolute)}#{row_str}#{suffix}#{suffix2}#{suffix3}"
     end
 
     #
@@ -53,7 +54,12 @@ module Writexlsx
 
     def xl_col_to_name(col, col_absolute)
       col_str = ColName.instance.col_str(col)
-      "#{absolute_char(col_absolute)}#{col_str}"
+      if col_absolute
+        "#{absolute_char(col_absolute)}#{col_str}"
+      else
+        # Do not allocate new string
+        col_str
+      end
     end
 
     def xl_range(row_1, row_2, col_1, col_2,
@@ -253,7 +259,7 @@ module Writexlsx
 
     # Check for a cell reference in A1 notation and substitute row and column
     def row_col_notation(args)   # :nodoc:
-      if args[0].to_s =~ /^\D/
+      if args[0].respond_to?(:match) && args[0] =~ /^\D/
         substitute_cellref(*args)
       else
         args

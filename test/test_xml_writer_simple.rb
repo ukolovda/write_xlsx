@@ -29,7 +29,7 @@ EOS
   end
 
   def test_start_end_tag
-    assert_equal("<foo></foo>", @obj.start_tag('foo') + @obj.end_tag('foo'))
+    assert_equal("<foo></foo>", @obj.start_tag_str('foo') + @obj.end_tag_str('foo'))
   end
 
   def test_attribute
@@ -41,7 +41,7 @@ EOS
   def test_character_data
     assert_equal(
       "<foo>&lt;tag&gt;&amp;amp;&lt;/tag&gt;</foo>",
-      @obj.start_tag('foo') + @obj.characters("<tag>&amp;</tag>") + @obj.end_tag('foo')
+      @obj.start_tag_str('foo') + @obj.characters("<tag>&amp;</tag>") + @obj.end_tag_str('foo')
     )
   end
 

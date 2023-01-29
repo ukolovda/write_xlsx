@@ -12,23 +12,22 @@ module Writexlsx
       # attributes for the <cell> element. This is the innermost loop so efficiency is
       # important where possible.
       #
-      def cell_attributes(worksheet, row, col) # :nodoc:
+      def cell_attributes(worksheet, row, col, additional_attributes = nil) # :nodoc:
         xf_index = xf ? xf.get_xf_index : 0
-        attributes = [
-          ['r', xl_rowcol_to_cell(row, col)]
-        ]
 
         # Add the cell format index.
-        if xf_index != 0
-          attributes << ['s', xf_index]
-        elsif worksheet.set_rows[row] && worksheet.set_rows[row][1]
-          row_xf = worksheet.set_rows[row][1]
-          attributes << ['s', row_xf.get_xf_index]
-        elsif worksheet.col_formats[col]
-          col_xf = worksheet.col_formats[col]
-          attributes << ['s', col_xf.get_xf_index]
-        end
-        attributes
+        attr2 = if xf_index != 0
+                  %Q( s="#{xf_index}")
+                elsif worksheet.set_rows[row] && worksheet.set_rows[row][1]
+                  row_xf = worksheet.set_rows[row][1]
+                  %Q( s="#{row_xf.get_xf_index}")
+                elsif worksheet.col_formats[col]
+                  col_xf = worksheet.col_formats[col]
+                  %Q( s="#{col_xf.get_xf_index}")
+                else
+                  nil
+                end
+        +xl_rowcol_to_cell(row, col, false, false, ' r="', '"', attr2, additional_attributes)
       end
 
       def display_url_string?
@@ -67,10 +66,8 @@ module Writexlsx
         { sst_id: token }
       end
 
-      TYPE_STR_ATTRS = %w[t s].freeze
       def write_cell(worksheet, row, col)
-        attributes = cell_attributes(worksheet, row, col)
-        attributes << TYPE_STR_ATTRS
+        attributes = cell_attributes(worksheet, row, col, ' t="s"')
         worksheet.writer.tag_elements('c', attributes) do
           worksheet.write_cell_value(token)
         end
@@ -98,17 +95,17 @@ module Writexlsx
         truefalse = { 'TRUE' => 1, 'FALSE' => 0 }
         error_code = ['#DIV/0!', '#N/A', '#NAME?', '#NULL!', '#NUM!', '#REF!', '#VALUE!']
 
-        attributes = cell_attributes(worksheet, row, col)
         if @result && !(@result.to_s =~ /^([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?$/)
           if truefalse[@result]
-            attributes << %w[t b]
+            additional_attributes = ' t="b"'
             @result = truefalse[@result]
           elsif error_code.include?(@result)
-            attributes << %w[t e]
+            additional_attributes = ' t="e"'
           else
-            attributes << %w[t str]
+            additional_attributes = ' t="str"'
           end
         end
+        attributes = cell_attributes(worksheet, row, col, additional_attributes)
         worksheet.writer.tag_elements('c', attributes) do
           worksheet.write_cell_formula(token)
           worksheet.write_cell_value(result || 0)
@@ -154,8 +151,7 @@ module Writexlsx
 
       def write_cell(worksheet, row, col)
         # Add metadata linkage for dynamic array formulas.
-        attributes = cell_attributes(worksheet, row, col)
-        attributes << %w[cm 1]
+        attributes = cell_attributes(worksheet, row, col, ' cm="1"')
 
         worksheet.writer.tag_elements('c', attributes) do
           worksheet.write_cell_array_formula(token, range)
@@ -177,9 +173,8 @@ module Writexlsx
       end
 
       def write_cell(worksheet, row, col)
-        attributes = cell_attributes(worksheet, row, col)
+        attributes = cell_attributes(worksheet, row, col, ' t="b"')
 
-        attributes << %w[t b]
         worksheet.writer.tag_elements('c', attributes) do
           worksheet.write_cell_value(token)
         end
