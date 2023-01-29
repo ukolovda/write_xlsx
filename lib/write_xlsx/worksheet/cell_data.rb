@@ -15,7 +15,7 @@ module Writexlsx
       def cell_attributes(worksheet, row, col) # :nodoc:
         xf_index = xf ? xf.get_xf_index : 0
         attributes = [
-          ['r', xl_rowcol_to_cell(row, col)]
+          xl_rowcol_to_cell(row, col, false, false, ' r="', '"')
         ]
 
         # Add the cell format index.
@@ -66,7 +66,7 @@ module Writexlsx
         { :sst_id => token }
       end
 
-      TYPE_STR_ATTRS = %w[t s].freeze
+      TYPE_STR_ATTRS = ' t="s"'.freeze
       def write_cell(worksheet, row, col)
         attributes = cell_attributes(worksheet, row, col)
         attributes << TYPE_STR_ATTRS

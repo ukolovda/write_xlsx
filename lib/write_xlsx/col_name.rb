@@ -7,12 +7,11 @@ class ColName
   include Singleton
 
   def initialize
-    @col_str_table = {}
+    @col_str_table = []
   end
 
   def col_str(col)
-    @col_str_table[col] = col_str_build(col) unless @col_str_table[col]
-    @col_str_table[col]
+    @col_str_table[col] ||= col_str_build(col)
   end
 
   private
