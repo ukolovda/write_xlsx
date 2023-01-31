@@ -82,15 +82,15 @@ module Writexlsx
       # Write the <si> element.
       #
       def write_si(string)
-        attributes = []
-
         # Excel escapes control characters with _xHHHH_ and also escapes any
         # literal strings of that type by encoding the leading underscore. So
         # "\0" -> _x0000_ and "_x0000_" -> _x005F_x0000_.
         # The following substitutions deal with those cases.
 
         # Escape the escape.
-        string = string.gsub(/(_x[0-9a-fA-F]{4}_)/, '_x005F\1')
+        if string =~ /(_x[0-9a-fA-F]{4}_)/
+          string = string.gsub(/(_x[0-9a-fA-F]{4}_)/, '_x005F\1')
+        end
 
         # Convert control character to the _xHHHH_ escape.
         if string =~ /([\x00-\x08\x0B-\x1F])/
@@ -104,7 +104,9 @@ module Writexlsx
         string = add_c2_c3(string) if string.bytesize == 1 && 0x80 <= string.ord && string.ord <= 0xFF
 
         # Add attribute to preserve leading or trailing whitespace.
-        attributes << PRESERVE_SPACE_ATTRIBUTES if string =~ /\A\s|\s\Z/
+        attributes = if string =~ /\A\s|\s\Z/
+                       [PRESERVE_SPACE_ATTRIBUTES]
+                     end
 
         # Write any rich strings without further tags.
         if string =~ /^<r>/ && string =~ %r{</r>$}

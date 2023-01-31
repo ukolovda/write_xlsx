@@ -8,10 +8,15 @@ class ColName
 
   def initialize
     @col_str_table = []
+    @row_str_table = []
   end
 
   def col_str(col)
     @col_str_table[col] ||= col_str_build(col)
+  end
+
+  def row_str(row)
+    @row_str_table[row] ||= row.to_s
   end
 
   private

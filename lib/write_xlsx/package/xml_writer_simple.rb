@@ -12,8 +12,7 @@ module Writexlsx
       XMLNS = 'http://schemas.openxmlformats.org/spreadsheetml/2006/main'
 
       def initialize
-        @io = []
-        # @io = StringIO.new
+        @io = StringIO.new
         # Will allocate new string once, then use allocated string
         # Key is tag name
         # Only tags without attributes will be cached
@@ -56,11 +55,19 @@ module Writexlsx
           @tag_start_cache[tag] ||= ["<", tag, ">"]
         else
           # puts tag, attr
-          attr.map! { |a| key_val_attr(a) }
-          attr.prepend tag
-          attr.prepend "<"
-          attr << ">"
-          attr
+          if attr.is_a?(String)
+            # "<#{tag}#{attr}>"
+            attr.prepend tag
+            attr.prepend "<"
+            attr << ">"
+            attr
+          else
+            attr.map! { |a| key_val_attr(a) }
+            attr.prepend tag
+            attr.prepend "<"
+            attr << ">"
+            attr
+          end
           # ["<", tag, key_vals(attr), ">"]
         end
       end
@@ -122,18 +129,16 @@ module Writexlsx
       end
 
       def string
-        # @io.string
-        @io = @io.join.force_encoding("UTF-8")
+        @io.string
       end
 
       def io_write(str)
         if str.is_a?(Array)
-          # @io += str
           str.each do |s|
-            @io << s
+            @io.write s
           end
         else
-          @io << str
+          @io.write str
         end
         str
       end
@@ -146,25 +151,20 @@ module Writexlsx
 
       # attr is an Array or string
       def key_val_attr(attr)
-        attr.is_a?(Array) ?
-          key_val(attr.first, escape_attributes(attr.last)) :
-          attr
+        attr.is_a?(String) ?
+          attr :
+          key_val(attr.first, escape_attributes(attr.last))
       end
 
       def key_vals(attribute)
         if attribute
-          case attribute.length
-            when 0
-              ''
-            when 1
-              key_val_attr(attribute[0])
-            when 2
-              key_val_attr(attribute[0])+key_val_attr(attribute[1])
-            else
-              attribute.inject('') do |str, attr|
-                # attr can be array with 2 items, or string (constant, i.e. ' tag="value"')
-                str + key_val_attr(attr)
-              end
+          if attribute.is_a?(String)
+            attribute
+          else
+            attribute.inject('') do |str, attr|
+              # attr can be array with 2 items, or string (constant, i.e. ' tag="value"')
+              str + key_val_attr(attr)
+            end
           end
         end
       end

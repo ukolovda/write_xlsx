@@ -13,10 +13,11 @@ module Writexlsx
     #
     # xl_rowcol_to_cell($row, col, row_absolute, col_absolute)
     #
-    def xl_rowcol_to_cell(row, col, row_absolute = false, col_absolute = false, prefix=nil, suffix=nil)
+    def xl_rowcol_to_cell(row, col, row_absolute = false, col_absolute = false, prefix=nil, suffix=nil, suffix2 = nil, suffix3 = nil)
       row += 1      # Change from 0-indexed to 1 indexed.
       col_str = xl_col_to_name(col, col_absolute)
-      "#{prefix}#{col_str}#{absolute_char(row_absolute)}#{row}#{suffix}"
+      row_str = ColName.instance.row_str(row)
+      "#{prefix}#{col_str}#{absolute_char(row_absolute)}#{row_str}#{suffix}#{suffix2}#{suffix3}"
     end
 
     #
