@@ -26,65 +26,76 @@ module Writexlsx
 
       def xml_decl(encoding = 'UTF-8', standalone = true)
         str = %(<?xml version="1.0" encoding="#{encoding}" standalone="#{standalone ? "yes" : "no"}"?>\n)
-        io_write(str)
+        io_write([str])
+        str
       end
 
-      def tag_elements(tag, attributes = [])
+      def tag_elements(tag, attributes = nil)
         start_tag(tag, attributes)
         yield
         end_tag(tag)
       end
 
-      def tag_elements_str(tag, attributes = [])
+      def tag_elements_str(tag, attributes = nil)
         start_tag_str(tag, attributes) +
           yield +
           end_tag_str(tag)
       end
 
-      def start_tag(tag, attr = [])
-        io_write(start_tag_str(tag, attr))
+      def start_tag(tag, attr = nil)
+        io_write start_tag_arr(tag, attr)
       end
 
-      def start_tag_str(tag, attr = [])
-        if attr.empty?
-          result = @tag_start_cache[tag]
-          unless result
-            result = "<#{tag}>"
-            @tag_start_cache[tag] = result
-          end
+      def start_tag_str(tag, attr = nil)
+        start_tag_arr(tag, attr).join
+      end
+
+      def start_tag_arr(tag, attr)
+        if attr.nil? || attr.empty?
+          @tag_start_cache[tag] ||= ["<", tag, ">"]
         else
-          result = "<#{tag}#{key_vals(attr)}>"
+          if attr.is_a?(String)
+            # "<#{tag}#{attr}>"
+            attr.prepend tag
+            attr.prepend "<"
+            attr << ">"
+            attr
+          else
+            attr.map! { |a| key_val_attr(a) }
+            attr.prepend tag
+            attr.prepend "<"
+            attr << ">"
+            attr
+          end
         end
-        result
       end
 
       def end_tag(tag)
-        io_write(end_tag_str(tag))
+        io_write end_tag_arr(tag)
       end
 
       def end_tag_str(tag)
-        result = @tag_end_cache[tag]
-        unless result
-          result = "</#{tag}>"
-          @tag_end_cache[tag] = result
-        end
-        result
+        end_tag_arr(tag).join
       end
 
-      def empty_tag(tag, attr = [])
+      def end_tag_arr(tag)
+        @tag_end_cache[tag] ||= ["</", tag, ">"]
+      end
+
+      def empty_tag(tag, attr = nil)
         str = "<#{tag}#{key_vals(attr)}/>"
         io_write(str)
       end
 
-      def empty_tag_encoded(tag, attr = [])
+      def empty_tag_encoded(tag, attr = nil)
         io_write(empty_tag_encoded_str(tag, attr))
       end
 
-      def empty_tag_encoded_str(tag, attr = [])
+      def empty_tag_encoded_str(tag, attr = nil)
         "<#{tag}#{key_vals(attr)}/>"
       end
 
-      def data_element(tag, data, attr = [])
+      def data_element(tag, data, attr = nil)
         tag_elements(tag, attr) { io_write(escape_data(data)) }
       end
 
@@ -120,7 +131,13 @@ module Writexlsx
       end
 
       def io_write(str)
-        @io << str
+        if str.is_a?(Array)
+          str.each do |s|
+            @io.write s
+          end
+        else
+          @io.write str
+        end
         str
       end
 
@@ -130,13 +147,28 @@ module Writexlsx
         %( #{key}="#{val}")
       end
 
+      # attr is an Array or string
+      def key_val_attr(attr)
+        attr.is_a?(String) ?
+          attr :
+          key_val(attr.first, escape_attributes(attr.last))
+      end
+
       def key_vals(attribute)
-        attribute
-          .inject('') { |str, attr| str + key_val(attr.first, escape_attributes(attr.last)) }
+        if attribute
+          if attribute.is_a?(String)
+            attribute
+          else
+            attribute.inject('') do |str, attr|
+              # attr can be array with 2 items, or string (constant, i.e. ' tag="value"')
+              str + key_val_attr(attr)
+            end
+          end
+        end
       end
 
       def escape_attributes(str = '')
-        return str unless str.to_s =~ /["&<>\n]/
+        return str unless str.respond_to?(:match) && str =~ /["&<>\n]/
 
         str
           .gsub(/&/, "&amp;")
@@ -147,7 +179,7 @@ module Writexlsx
       end
 
       def escape_data(str = '')
-        if str.to_s =~ /[&<>]/
+        if str.respond_to?(:match) && str =~ /[&<>]/
           str.gsub(/&/, '&amp;')
              .gsub(/</, '&lt;')
              .gsub(/>/, '&gt;')
