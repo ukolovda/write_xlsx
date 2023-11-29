@@ -43,7 +43,7 @@ module Writexlsx
         if attr.nil? || attr.empty?
           @tag_start_cache[tag] ||= "<#{tag}>"
         else
-          "<#{tag}#{key_vals(attr)}>"
+          make_tag_with_attributes(tag, attr, ">")
         end
       end
 
@@ -56,7 +56,7 @@ module Writexlsx
       end
 
       def empty_tag(tag, attr = nil)
-        str = "<#{tag}#{key_vals(attr)}/>"
+        str = make_tag_with_attributes(tag, attr, "/>")
         io_write(str)
       end
 
@@ -102,9 +102,9 @@ module Writexlsx
 
       private
 
-      def key_vals(attribute)
+      def make_tag_with_attributes(tag_name, attribute, suffix)
+        result = +"<#{tag_name}" # Uniq string
         if attribute
-          result = "".dup
           attribute.each do |attr|
             # Generate and concat %( #{key}="#{val}") values for attribute pair
             result << " "
@@ -113,8 +113,9 @@ module Writexlsx
             result << escape_attributes(attr.last).to_s
             result << '"'
           end
-          result
         end
+        result << suffix
+        result
       end
 
       def escape_attributes(str = '')
